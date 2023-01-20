@@ -6,9 +6,10 @@ contract Bank {
     struct CustomerDetails {
         string User;
         address UserAddr;
-        string AccountPassword;
+        //string AccountPassword;
         bytes32 myPassowrd;
         uint Balance;
+        string AccountType;
     }
 
     CustomerDetails public customerDetails;
@@ -16,13 +17,11 @@ contract Bank {
     //CustomerDetails[] public customerDetails;
 
     function setPassword(string memory _accountPassword) public {
-        customerDetails.AccountPassword = _accountPassword;
+        //customerDetails.AccountPassword = _accountPassword;
         customerDetails.myPassowrd = keccak256(
             abi.encodePacked(_accountPassword)
         );
     }
 
-    function getStruct() public view returns (CustomerDetails memory) {
-        return customerDetails;
-    }
+    function createAccount() public {}
 }
