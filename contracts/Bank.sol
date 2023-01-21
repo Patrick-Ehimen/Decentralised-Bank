@@ -23,10 +23,10 @@ contract Bank {
     string private constant ACCT_TYPE_3 = "Fixed_Depost";
 
     //CustomerDetails public customerDetails;
-    CustomerDetails[] public customers;
-    Transactions[] public transactions;
+    CustomerDetails[] private customers;
+    Transactions[] private transactions;
 
-    mapping(address => bool) public customerExist;
+    mapping(address => bool) private customerExist;
     mapping(address => Transactions) public newtransactions;
     mapping(address => CustomerDetails) public customerDetails;
 
@@ -74,6 +74,7 @@ contract Bank {
     }
 
     function deposit() public payable {
+        require(msg.sender != address(0), "You cannot use a zero address");
         require(msg.value != 0, "You cannot deposit 0 amount");
         require(customerExist[msg.sender], "You do not have an account");
         customerDetails[msg.sender].Balance += msg.value;
@@ -86,5 +87,10 @@ contract Bank {
         transaction.receiverAddr = msg.sender;
         transaction.timeStamp = block.timestamp;
         newtransactions[msg.sender] = transaction;
+    }
+
+    function getBalance() public view returns (uint256) {
+        require(customerExist[msg.sender], "You do not have an account");
+        return customerDetails[msg.sender].Balance;
     }
 }
