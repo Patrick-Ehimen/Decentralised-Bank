@@ -10,15 +10,25 @@ contract Bank {
         uint Balance;
         string AccountType;
     }
+
+    struct Transactions {
+        uint256 amount;
+        address receiverAddr;
+        uint256 timeStamp;
+    }
+
     string bank;
-    string public constant ACCT_TYPE_1 = "Savings";
-    string public constant ACCT_TYPE_2 = "Current";
-    string public constant ACCT_TYPE_3 = "Fixed_Depost";
+    string private constant ACCT_TYPE_1 = "Savings";
+    string private constant ACCT_TYPE_2 = "Current";
+    string private constant ACCT_TYPE_3 = "Fixed_Depost";
 
     //CustomerDetails public customerDetails;
     CustomerDetails[] public customers;
+    Transactions[] public transactions;
 
     mapping(address => bool) public customerExist;
+    mapping(address => Transactions) public newtransactions;
+    mapping(address => CustomerDetails) public customerDetails;
 
     constructor() {
         bank = "De_Bank DAO";
@@ -59,7 +69,22 @@ contract Bank {
         } else if (msg.value >= 10 ether) {
             accountCreated.AccountType = ACCT_TYPE_3;
         }
+
+        addTransaction();
     }
 
-    function deposit() public payable {}
+    function deposit() public payable {
+        require(msg.value != 0, "You cannot deposit 0 amount");
+        require(customerExist[msg.sender], "You do not have an account");
+        customerDetails[msg.sender].Balance += msg.value;
+        addTransaction();
+    }
+
+    function addTransaction() private {
+        Transactions storage transaction = transactions.push();
+        transaction.amount = msg.value;
+        transaction.receiverAddr = msg.sender;
+        transaction.timeStamp = block.timestamp;
+        newtransactions[msg.sender] = transaction;
+    }
 }
