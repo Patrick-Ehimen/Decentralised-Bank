@@ -8,18 +8,14 @@ contract Bank {
         uint AcctBalance;
     }
 
-    mapping(address => bytes32) passwords;
+    mapping(address => bytes32) public passwords;
 
-    CustomerDetails[] public customers;
+    CustomerDetails[] private customers;
 
     mapping(address => bool) public customerExist;
+    mapping(address => CustomerDetails) public customerDetails;
 
     receive() external payable {}
-
-    // modifier onlyUser() {
-    //     require(CustomerDetails[msg.sender] == msg.sender, "You are not a user");
-    //     _;
-    // }
 
     function createAccount(string memory password) public {
         CustomerDetails storage accountCreated = customers.push();
@@ -36,6 +32,12 @@ contract Bank {
         require(customerExist[msg.sender], "Account does not exist");
         require(msg.value > 0, "Deposit amount must be greater than 0");
         CustomerDetails storage accountCreated = customers.push();
-        accountCreated.AcctBalance += msg.value;
+        accountCreated.AcctBalance = msg.value;
+        customerDetails[msg.sender] = accountCreated;
+    }
+
+    function getBalance() public view returns (uint) {
+        require(customerExist[msg.sender], "Account does not exist");
+        return customerDetails[msg.sender].AcctBalance;
     }
 }
