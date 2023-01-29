@@ -7,6 +7,11 @@ contract Bank {
         address UserAddr;
         uint AcctBalance;
     }
+    struct LockedBalance {
+        uint amount;
+        uint unlockTime;
+    }
+
     address public bank;
     uint internal customerCount;
     uint internal feesBalance;
@@ -16,8 +21,10 @@ contract Bank {
     mapping(address => bytes32) private passwords;
     mapping(address => bool) private customerExist;
     mapping(address => CustomerDetails) public customerDetails;
+    mapping(address => LockedBalance[]) public lockedBalances;
 
     event Withdrawal(uint amount, uint when);
+    event Locked(uint amount, uint unlockTime);
 
     receive() external payable {}
 
@@ -84,5 +91,24 @@ contract Bank {
         return address(this).balance;
     }
 
-    function lockBalance() public {}
+    function lockBalance(uint amount, uint unlockTime) public {
+        require(customerExist[msg.sender], "Account does not exist");
+        require(amount > 0, "Lock amount must be greater than 0");
+        require(
+            amount <= customerDetails[msg.sender].AcctBalance,
+            "Insufficient funds"
+        );
+        require(
+            unlockTime > block.timestamp,
+            "Unlock time should be in the future"
+        );
+
+        LockedBalance storage locked = lockedBalances[msg.sender].push();
+        locked.amount = amount;
+        locked.unlockTime = unlockTime;
+
+        customerDetails[msg.sender].AcctBalance -= amount;
+
+        emit Locked(amount, unlockTime);
+    }
 }
