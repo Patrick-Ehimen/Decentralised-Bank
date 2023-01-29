@@ -7,15 +7,19 @@ contract Bank {
         address UserAddr;
         uint AcctBalance;
     }
-
-    mapping(address => bytes32) public passwords;
+    address public bank;
 
     CustomerDetails[] private customers;
 
+    mapping(address => bytes32) public passwords;
     mapping(address => bool) public customerExist;
     mapping(address => CustomerDetails) public customerDetails;
 
     receive() external payable {}
+
+    constructor() {
+        bank = msg.sender;
+    }
 
     function createAccount(string memory password) public {
         CustomerDetails storage accountCreated = customers.push();
@@ -36,8 +40,27 @@ contract Bank {
         customerDetails[msg.sender] = accountCreated;
     }
 
+    function withdraw(uint amount, string memory password) public {
+        bytes32 hashedPassword = keccak256(abi.encodePacked(password));
+        require(hashedPassword == passwords[msg.sender], "Incorrect password");
+        require(customerExist[msg.sender], "Account does not exist");
+        require(amount > 0, "Withdraw amount must be greater than 0");
+        require(
+            amount <= customerDetails[msg.sender].AcctBalance,
+            "Insufficient funds"
+        );
+
+        payable(msg.sender).transfer(amount);
+        customerDetails[msg.sender].AcctBalance -= amount;
+    }
+
     function getBalance() public view returns (uint) {
         require(customerExist[msg.sender], "Account does not exist");
         return customerDetails[msg.sender].AcctBalance;
+    }
+
+    function getContractBalance() public view returns (uint) {
+        require(msg.sender == bank, "You are not the owner of this contract");
+        return address(this).balance;
     }
 }
