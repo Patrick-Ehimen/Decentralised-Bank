@@ -8,14 +8,16 @@ contract Bank {
         uint AcctBalance;
     }
     address public bank;
-    uint public customerCount;
-    uint public feesBalance;
+    uint internal customerCount;
+    uint internal feesBalance;
 
     CustomerDetails[] private customers;
 
-    mapping(address => bytes32) public passwords;
-    mapping(address => bool) public customerExist;
+    mapping(address => bytes32) private passwords;
+    mapping(address => bool) private customerExist;
     mapping(address => CustomerDetails) public customerDetails;
+
+    event Withdrawal(uint amount, uint when);
 
     receive() external payable {}
 
@@ -62,9 +64,11 @@ contract Bank {
 
         payable(msg.sender).transfer(amount);
         customerDetails[msg.sender].AcctBalance -= amount;
+
+        emit Withdrawal(address(this).balance, block.timestamp);
     }
 
-    function withdraFees() public {
+    function withdrawFees() public {
         require(msg.sender == bank, "You are not the owner of this contract");
         payable(msg.sender).transfer(feesBalance);
         feesBalance = 0;
@@ -79,4 +83,6 @@ contract Bank {
         require(msg.sender == bank, "You are not the owner of this contract");
         return address(this).balance;
     }
+
+    function lockBalance() public {}
 }
