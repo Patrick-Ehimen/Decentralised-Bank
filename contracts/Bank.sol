@@ -8,6 +8,7 @@ contract Bank {
         uint AcctBalance;
     }
     address public bank;
+    uint public feesBalance;
 
     CustomerDetails[] private customers;
 
@@ -16,6 +17,8 @@ contract Bank {
     mapping(address => CustomerDetails) public customerDetails;
 
     receive() external payable {}
+
+    fallback() external payable {}
 
     constructor() {
         bank = msg.sender;
@@ -50,8 +53,18 @@ contract Bank {
             "Insufficient funds"
         );
 
+        uint bankFee = (amount * 5) / 1000;
+        amount -= bankFee;
+        feesBalance += bankFee;
+
         payable(msg.sender).transfer(amount);
         customerDetails[msg.sender].AcctBalance -= amount;
+    }
+
+    function withdraFees() public {
+        require(msg.sender == bank, "You are not the owner of this contract");
+        payable(msg.sender).transfer(feesBalance);
+        feesBalance = 0;
     }
 
     function getBalance() public view returns (uint) {
