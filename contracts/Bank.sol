@@ -25,7 +25,8 @@ contract Bank {
 
     event Withdrawal(uint amount, uint when);
     event Locked(uint amount, uint unlockTime);
-    event Unlocked(uint amount, uint unlockTime);
+
+    //event Unlocked(uint amount, uint unlockTime);
 
     receive() external payable {}
 
@@ -123,102 +124,88 @@ contract Bank {
         emit Locked(amount, unlockTime);
     }
 
-    // function unlockeBalance() public {
-    //     require(customerExist[msg.sender], "Account does not exist");
-    //     LockedBalance[] storage locked = lockedBalances[msg.sender];
-    //     for (uint i = 0; i < locked.length; i++) {
-    //         if (locked[i].unlockTime <= block.timestamp) {
-    //             customerDetails[msg.sender].AcctBalance += locked[i].amount;
-    //             locked[i].amount = 0;
-    //             locked[i].unlockTime = 0;
-    //         }
-    //     }
-    // }
-
-    function unlockBalance(uint amount) public {
+    function unlockBalance() public {
         require(customerExist[msg.sender], "Account does not exist");
-        require(
-            lockedBalances[msg.sender].length > 0,
-            "No locked balances found"
-        );
-        uint totalUnlocked = 0;
-        for (uint i = 0; i < lockedBalances[msg.sender].length; i++) {
-            if (
-                lockedBalances[msg.sender][i].unlockTime <= block.timestamp &&
-                lockedBalances[msg.sender][i].amount > 0
-            ) {
-                if (
-                    lockedBalances[msg.sender][i].amount >=
-                    amount - totalUnlocked
-                ) {
-                    customerDetails[msg.sender].AcctBalance +=
-                        amount -
-                        totalUnlocked;
-                    lockedBalances[msg.sender][i].amount -=
-                        amount -
-                        totalUnlocked;
-                    break;
-                } else {
-                    totalUnlocked += lockedBalances[msg.sender][i].amount;
-                    customerDetails[msg.sender].AcctBalance += lockedBalances[
-                        msg.sender
-                    ][i].amount;
-                    lockedBalances[msg.sender][i].amount = 0;
-                }
+        LockedBalance[] storage locked = lockedBalances[msg.sender];
+        for (uint i = 0; i < locked.length; i++) {
+            if (locked[i].unlockTime <= block.timestamp) {
+                customerDetails[msg.sender].AcctBalance += locked[i].amount;
+                locked[i].amount = 0;
+                locked[i].unlockTime = 0;
             }
         }
-        require(
-            totalUnlocked == amount,
-            "Amount to be unlocked exceeds available balance"
-        );
-
-        emit Unlocked(amount, block.timestamp);
     }
 
-    function transfer(
-        address recipient,
-        uint amount,
-        string memory password
-    ) public {
-        bytes32 hashedPassword = keccak256(abi.encodePacked(password));
-        require(hashedPassword == passwords[msg.sender], "Incorrect password");
-        require(customerExist[msg.sender], "Account does not exist");
-        require(amount > 0, "Transfer amount must be greater than 0");
-        require(
-            amount <= customerDetails[msg.sender].AcctBalance,
-            "Insufficient funds"
-        );
-        uint bankFee = (amount * 2) / 1000;
-        amount -= bankFee;
-        feesBalance += bankFee;
+    // function unlockBalance(uint amount) public {
+    //     require(customerExist[msg.sender], "Account does not exist");
+    //     require(
+    //         lockedBalances[msg.sender].length > 0,
+    //         "No locked balances found"
+    //     );
+    //     uint totalUnlocked = 0;
+    //     for (uint i = 0; i < lockedBalances[msg.sender].length; i++) {
+    //         if (
+    //             lockedBalances[msg.sender][i].unlockTime <= block.timestamp &&
+    //             lockedBalances[msg.sender][i].amount > 0
+    //         ) {
+    //             if (
+    //                 lockedBalances[msg.sender][i].amount >=
+    //                 amount - totalUnlocked
+    //             ) {
+    //                 customerDetails[msg.sender].AcctBalance +=
+    //                     amount -
+    //                     totalUnlocked;
+    //                 lockedBalances[msg.sender][i].amount -=
+    //                     amount -
+    //                     totalUnlocked;
+    //                 break;
+    //             } else {
+    //                 totalUnlocked += lockedBalances[msg.sender][i].amount;
+    //                 customerDetails[msg.sender].AcctBalance += lockedBalances[
+    //                     msg.sender
+    //                 ][i].amount;
+    //                 lockedBalances[msg.sender][i].amount = 0;
+    //             }
+    //         }
+    //     }
+    //     require(
+    //         totalUnlocked == amount,
+    //         "Amount to be unlocked exceeds available balance"
+    //     );
 
-        customerDetails[msg.sender].AcctBalance -= amount;
-        customerDetails[recipient].AcctBalance += amount;
-    }
+    //     emit Unlocked(amount, block.timestamp);
+    // }
 
-    function interTransfer(
-        address recipient,
+    function transferFunds(
+        address to,
         uint amount,
         string memory password
     ) public payable {
         bytes32 hashedPassword = keccak256(abi.encodePacked(password));
         require(hashedPassword == passwords[msg.sender], "Incorrect password");
-        require(customerExist[msg.sender], "Account does not exist");
-        require(amount > 0, "Transfer amount must be greater than 0");
+        require(customerExist[msg.sender], "Sender account does not exist");
+        require(amount > 0, "Amount must be greater than 0");
         require(
             amount <= customerDetails[msg.sender].AcctBalance,
             "Insufficient funds"
         );
-        uint bankFee = (amount * 2) / 1000;
-        amount -= bankFee;
+
+        uint bankFee;
+        if (customerExist[to]) {
+            bankFee = (amount * 1) / 1000;
+        } else {
+            bankFee = (amount * 3) / 1000;
+        }
+
+        uint transferAmount = amount - bankFee;
+        customerDetails[msg.sender].AcctBalance -= amount;
         feesBalance += bankFee;
 
-        require(customerExist[recipient], "Recipient account does not exist");
-
-        customerDetails[msg.sender].AcctBalance -= amount;
-        customerDetails[recipient].AcctBalance += amount;
-
-        payable(recipient).transfer(msg.value);
+        if (customerExist[to]) {
+            customerDetails[to].AcctBalance += transferAmount;
+        } else {
+            payable(to).transfer(transferAmount);
+        }
     }
 
     function changePassword(
