@@ -8,6 +8,7 @@ contract Bank {
         uint AcctBalance;
     }
     address public bank;
+    uint public customerCount;
     uint public feesBalance;
 
     CustomerDetails[] private customers;
@@ -33,6 +34,8 @@ contract Bank {
 
         bytes32 hashedPassword = keccak256(abi.encodePacked(password));
         passwords[msg.sender] = hashedPassword;
+
+        customerCount++;
     }
 
     function deposit() public payable {
