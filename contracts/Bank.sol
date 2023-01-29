@@ -91,7 +91,13 @@ contract Bank {
         return address(this).balance;
     }
 
-    function lockBalance(uint amount, uint unlockTime) public {
+    function lockBalance(
+        uint amount,
+        uint unlockTime,
+        string memory password
+    ) public {
+        bytes32 hashedPassword = keccak256(abi.encodePacked(password));
+        require(hashedPassword == passwords[msg.sender], "Incorrect password");
         require(customerExist[msg.sender], "Account does not exist");
         require(amount > 0, "Lock amount must be greater than 0");
         require(
@@ -107,8 +113,17 @@ contract Bank {
         locked.amount = amount;
         locked.unlockTime = unlockTime;
 
+        uint bankFee = (amount * 1) / 1000;
+        amount -= bankFee;
+        feesBalance += bankFee;
+
         customerDetails[msg.sender].AcctBalance -= amount;
 
         emit Locked(amount, unlockTime);
     }
+
+    function changePassword(
+        string memory password,
+        string memory newPassword
+    ) public {}
 }
