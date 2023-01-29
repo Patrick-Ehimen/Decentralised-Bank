@@ -175,6 +175,52 @@ contract Bank {
         emit Unlocked(amount, block.timestamp);
     }
 
+    function transfer(
+        address recipient,
+        uint amount,
+        string memory password
+    ) public {
+        bytes32 hashedPassword = keccak256(abi.encodePacked(password));
+        require(hashedPassword == passwords[msg.sender], "Incorrect password");
+        require(customerExist[msg.sender], "Account does not exist");
+        require(amount > 0, "Transfer amount must be greater than 0");
+        require(
+            amount <= customerDetails[msg.sender].AcctBalance,
+            "Insufficient funds"
+        );
+        uint bankFee = (amount * 2) / 1000;
+        amount -= bankFee;
+        feesBalance += bankFee;
+
+        customerDetails[msg.sender].AcctBalance -= amount;
+        customerDetails[recipient].AcctBalance += amount;
+    }
+
+    function interTransfer(
+        address recipient,
+        uint amount,
+        string memory password
+    ) public payable {
+        bytes32 hashedPassword = keccak256(abi.encodePacked(password));
+        require(hashedPassword == passwords[msg.sender], "Incorrect password");
+        require(customerExist[msg.sender], "Account does not exist");
+        require(amount > 0, "Transfer amount must be greater than 0");
+        require(
+            amount <= customerDetails[msg.sender].AcctBalance,
+            "Insufficient funds"
+        );
+        uint bankFee = (amount * 2) / 1000;
+        amount -= bankFee;
+        feesBalance += bankFee;
+
+        require(customerExist[recipient], "Recipient account does not exist");
+
+        customerDetails[msg.sender].AcctBalance -= amount;
+        customerDetails[recipient].AcctBalance += amount;
+
+        payable(recipient).transfer(msg.value);
+    }
+
     function changePassword(
         string memory password,
         string memory newPassword
