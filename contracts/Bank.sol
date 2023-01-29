@@ -232,14 +232,6 @@ contract Bank {
         passwords[msg.sender] = newHashedPassword;
     }
 
-    function deleteAccount() public {
-        require(customerExist[msg.sender], "Account does not exist");
-        delete customerDetails[msg.sender];
-        delete customerExist[msg.sender];
-        delete passwords[msg.sender];
-        delete lockedBalances[msg.sender];
-    }
-
     function deleteAccount(string memory password) public {
         bytes32 hashedPassword = keccak256(abi.encodePacked(password));
         require(hashedPassword == passwords[msg.sender], "Incorrect password");
