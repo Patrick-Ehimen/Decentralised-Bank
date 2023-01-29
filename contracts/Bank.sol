@@ -25,6 +25,7 @@ contract Bank {
 
     event Withdrawal(uint amount, uint when);
     event Locked(uint amount, uint unlockTime);
+    event Unlocked(uint amount, uint unlockTime);
 
     receive() external payable {}
 
@@ -120,6 +121,51 @@ contract Bank {
         customerDetails[msg.sender].AcctBalance -= amount;
 
         emit Locked(amount, unlockTime);
+    }
+
+    function unlockeBalance() public {
+        require(customerExist[msg.sender], "Account does not exist");
+        LockedBalance[] storage locked = lockedBalances[msg.sender];
+        for (uint i = 0; i < locked.length; i++) {
+            if (locked[i].unlockTime <= block.timestamp) {
+                customerDetails[msg.sender].AcctBalance += locked[i].amount;
+                locked[i].amount = 0;
+                locked[i].unlockTime = 0;
+            }
+        }
+    }
+
+    function unlockBalance(uint amount) public {
+        uint totalUnlocked = 0;
+        for (uint i = 0; i < lockedBalances[msg.sender].length; i++) {
+            if (
+                lockedBalances[msg.sender][i].unlockTime <= block.timestamp &&
+                lockedBalances[msg.sender][i].amount > 0
+            ) {
+                if (
+                    lockedBalances[msg.sender][i].amount >=
+                    amount - totalUnlocked
+                ) {
+                    customerDetails[msg.sender].AcctBalance +=
+                        amount -
+                        totalUnlocked;
+                    lockedBalances[msg.sender][i].amount -=
+                        amount -
+                        totalUnlocked;
+                    break;
+                } else {
+                    totalUnlocked += lockedBalances[msg.sender][i].amount;
+                    customerDetails[msg.sender].AcctBalance += lockedBalances[
+                        msg.sender
+                    ][i].amount;
+                    lockedBalances[msg.sender][i].amount = 0;
+                }
+            }
+        }
+        require(
+            totalUnlocked == amount,
+            "Amount to be unlocked exceeds available balance"
+        );
     }
 
     function changePassword(
