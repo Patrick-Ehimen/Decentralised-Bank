@@ -231,4 +231,26 @@ contract Bank {
         bytes32 newHashedPassword = keccak256(abi.encodePacked(newPassword));
         passwords[msg.sender] = newHashedPassword;
     }
+
+    function deleteAccount() public {
+        require(customerExist[msg.sender], "Account does not exist");
+        delete customerDetails[msg.sender];
+        delete customerExist[msg.sender];
+        delete passwords[msg.sender];
+        delete lockedBalances[msg.sender];
+    }
+
+    function deleteAccount(string memory password) public {
+        bytes32 hashedPassword = keccak256(abi.encodePacked(password));
+        require(hashedPassword == passwords[msg.sender], "Incorrect password");
+        require(customerExist[msg.sender], "Account does not exist");
+        require(
+            customerDetails[msg.sender].AcctBalance == 0,
+            "Please withdraw all funds before deleting account"
+        );
+        // Remove customer data
+        customerDetails[msg.sender].AcctBalance = 0;
+        passwords[msg.sender] = 0x0;
+        customerExist[msg.sender] = false;
+    }
 }
