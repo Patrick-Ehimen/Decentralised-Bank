@@ -123,19 +123,24 @@ contract Bank {
         emit Locked(amount, unlockTime);
     }
 
-    function unlockeBalance() public {
-        require(customerExist[msg.sender], "Account does not exist");
-        LockedBalance[] storage locked = lockedBalances[msg.sender];
-        for (uint i = 0; i < locked.length; i++) {
-            if (locked[i].unlockTime <= block.timestamp) {
-                customerDetails[msg.sender].AcctBalance += locked[i].amount;
-                locked[i].amount = 0;
-                locked[i].unlockTime = 0;
-            }
-        }
-    }
+    // function unlockeBalance() public {
+    //     require(customerExist[msg.sender], "Account does not exist");
+    //     LockedBalance[] storage locked = lockedBalances[msg.sender];
+    //     for (uint i = 0; i < locked.length; i++) {
+    //         if (locked[i].unlockTime <= block.timestamp) {
+    //             customerDetails[msg.sender].AcctBalance += locked[i].amount;
+    //             locked[i].amount = 0;
+    //             locked[i].unlockTime = 0;
+    //         }
+    //     }
+    // }
 
     function unlockBalance(uint amount) public {
+        require(customerExist[msg.sender], "Account does not exist");
+        require(
+            lockedBalances[msg.sender].length > 0,
+            "No locked balances found"
+        );
         uint totalUnlocked = 0;
         for (uint i = 0; i < lockedBalances[msg.sender].length; i++) {
             if (
@@ -166,10 +171,18 @@ contract Bank {
             totalUnlocked == amount,
             "Amount to be unlocked exceeds available balance"
         );
+
+        emit Unlocked(amount, block.timestamp);
     }
 
     function changePassword(
         string memory password,
         string memory newPassword
-    ) public {}
+    ) public {
+        bytes32 hashedPassword = keccak256(abi.encodePacked(password));
+        require(hashedPassword == passwords[msg.sender], "Incorrect password");
+        require(customerExist[msg.sender], "Account does not exist");
+        bytes32 newHashedPassword = keccak256(abi.encodePacked(newPassword));
+        passwords[msg.sender] = newHashedPassword;
+    }
 }
