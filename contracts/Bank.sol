@@ -25,6 +25,7 @@ contract Bank {
 
     event Withdrawal(uint amount, uint when);
     event Locked(uint amount, uint unlockTime);
+    event Unlocked(uint amount, uint unlockTime);
 
     //event Unlocked(uint amount, uint unlockTime);
 
@@ -66,6 +67,14 @@ contract Bank {
             amount <= customerDetails[msg.sender].AcctBalance,
             "Insufficient funds"
         );
+        uint availableBalance = customerDetails[msg.sender].AcctBalance;
+        for (uint i = 0; i < lockedBalances[msg.sender].length; i++) {
+            LockedBalance storage locked = lockedBalances[msg.sender][i];
+            if (locked.unlockTime > block.timestamp) {
+                availableBalance -= locked.amount;
+            }
+        }
+        require(amount <= availableBalance, "Insufficient funds");
 
         uint bankFee = (amount * 5) / 1000;
         amount -= bankFee;
@@ -111,6 +120,19 @@ contract Bank {
             "Unlock time should be in the future"
         );
 
+        // Check if any of the customer's balances are already locked
+        bool isLocked = false;
+        for (uint i = 0; i < lockedBalances[msg.sender].length; i++) {
+            if (lockedBalances[msg.sender][i].unlockTime > block.timestamp) {
+                isLocked = true;
+                break;
+            }
+        }
+        require(
+            !isLocked,
+            "You have locked balances that have not been unlocked yet"
+        );
+
         LockedBalance storage locked = lockedBalances[msg.sender].push();
         locked.amount = amount;
         locked.unlockTime = unlockTime;
@@ -122,6 +144,16 @@ contract Bank {
         customerDetails[msg.sender].AcctBalance -= amount;
 
         emit Locked(amount, unlockTime);
+
+        // Automatically unlock balance after the unlock time passes
+        if (block.timestamp >= unlockTime) {
+            customerDetails[msg.sender].AcctBalance += locked.amount;
+            delete lockedBalances[msg.sender][
+                lockedBalances[msg.sender].length - 1
+            ];
+            emit Unlocked(locked.amount, unlockTime);
+            // emit Unlocked(locked.amount);
+        }
     }
 
     function unlockBalance() public {
@@ -145,6 +177,14 @@ contract Bank {
         require(hashedPassword == passwords[msg.sender], "Incorrect password");
         require(customerExist[msg.sender], "Sender account does not exist");
         require(amount > 0, "Amount must be greater than 0");
+
+        uint availableBalance = customerDetails[msg.sender].AcctBalance;
+        for (uint i = 0; i < lockedBalances[msg.sender].length; i++) {
+            LockedBalance storage locked = lockedBalances[msg.sender][i];
+            if (locked.unlockTime > block.timestamp) {
+                availableBalance -= locked.amount;
+            }
+        }
         require(
             amount <= customerDetails[msg.sender].AcctBalance,
             "Insufficient funds"
