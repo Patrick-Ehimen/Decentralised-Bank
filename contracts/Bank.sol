@@ -136,46 +136,6 @@ contract Bank {
         }
     }
 
-    // function unlockBalance(uint amount) public {
-    //     require(customerExist[msg.sender], "Account does not exist");
-    //     require(
-    //         lockedBalances[msg.sender].length > 0,
-    //         "No locked balances found"
-    //     );
-    //     uint totalUnlocked = 0;
-    //     for (uint i = 0; i < lockedBalances[msg.sender].length; i++) {
-    //         if (
-    //             lockedBalances[msg.sender][i].unlockTime <= block.timestamp &&
-    //             lockedBalances[msg.sender][i].amount > 0
-    //         ) {
-    //             if (
-    //                 lockedBalances[msg.sender][i].amount >=
-    //                 amount - totalUnlocked
-    //             ) {
-    //                 customerDetails[msg.sender].AcctBalance +=
-    //                     amount -
-    //                     totalUnlocked;
-    //                 lockedBalances[msg.sender][i].amount -=
-    //                     amount -
-    //                     totalUnlocked;
-    //                 break;
-    //             } else {
-    //                 totalUnlocked += lockedBalances[msg.sender][i].amount;
-    //                 customerDetails[msg.sender].AcctBalance += lockedBalances[
-    //                     msg.sender
-    //                 ][i].amount;
-    //                 lockedBalances[msg.sender][i].amount = 0;
-    //             }
-    //         }
-    //     }
-    //     require(
-    //         totalUnlocked == amount,
-    //         "Amount to be unlocked exceeds available balance"
-    //     );
-
-    //     emit Unlocked(amount, block.timestamp);
-    // }
-
     function transferFunds(
         address to,
         uint amount,
