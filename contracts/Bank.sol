@@ -208,6 +208,18 @@ contract Bank {
         }
     }
 
+    // function checkLockedBalances() public {
+    //     for (uint i = 0; i < lockedBalances[msg.sender].length; i++) {
+    //         LockedBalance storage locked = lockedBalances[msg.sender][i];
+    //         if (locked.unlockTime <= block.timestamp) {
+    //             uint amount = locked.amount;
+    //             customerDetails[msg.sender].AcctBalance += amount;
+    //             lockedBalances[msg.sender].splice(i, 1);
+    //             emit Unlock(amount);
+    //         }
+    //     }
+    // }
+
     function changePassword(
         string memory password,
         string memory newPassword
