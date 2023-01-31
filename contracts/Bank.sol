@@ -2,6 +2,12 @@
 
 pragma solidity ^0.8.9;
 
+/**
+ * @title Bank
+ * @author  Patrick Ehimen
+ * @notice Decentralised Bank is a decentralised banking platform that allows users to
+ * securely store and manage funds.
+ */
 contract Bank {
     struct CustomerDetails {
         address UserAddr;
