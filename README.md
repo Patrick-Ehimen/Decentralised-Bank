@@ -59,3 +59,31 @@ npm install
 ```
 npx hardhat run scripts/deploy.js --network <network-name>
 ```
+
+- Interact with the smart contract using its functions
+
+## Functions
+
+`createAccount(string memory password)`
+This function allows a user to create an account. The user provides a password which is hashed and stored in the smart contract.
+
+deposit()
+This function allows a user to deposit funds into their account.
+
+withdraw(uint amount, string memory password)
+This function allows a user to withdraw funds from their account. The user provides the amount to be withdrawn and their password. The smart contract will check if the provided password is correct and if the user has sufficient funds before processing the withdrawal.
+
+withdrawFees()
+This function allows the owner of the smart contract to withdraw the fees collected from withdrawals.
+
+getBalance()
+This function returns the balance of the user's account.
+
+getContractBalance()
+This function returns the balance of the smart contract. Only the owner of the contract can access this function.
+
+lockBalance(uint amount, uint unlockTime, string memory password)
+This function allows a user to lock a portion of their funds for a specified period of time. The user provides the amount to be locked, the unlock time and their password. The smart contract will check if the provided password is correct and if the user has sufficient funds before processing the lock.
+
+unlockBalance(string memory password)
+This function allows a user to unlock the funds they have locked. The user provides their password. The smart contract will check if the provided password is correct and if the unlock time has passed before processing the unlock.
