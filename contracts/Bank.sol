@@ -9,10 +9,12 @@ pragma solidity ^0.8.9;
  * securely store and manage funds.
  */
 contract Bank {
+    // Struct to store Customer's details such as address and account balance
     struct CustomerDetails {
         address UserAddr;
         uint AcctBalance;
     }
+    // Struct to store locked balance and unlock time for a customer
     struct LockedBalance {
         uint amount;
         uint unlockTime;
@@ -22,18 +24,24 @@ contract Bank {
     uint internal customerCount;
     uint internal feesBalance;
 
+    // Private array to store customer details
     CustomerDetails[] private customers;
 
+    // Mapping to store password of a customer against its address
     mapping(address => bytes32) private passwords;
+    // Mapping to check if a customer exist
     mapping(address => bool) private customerExist;
+    // Mapping to store customer details against its address
     mapping(address => CustomerDetails) public customerDetails;
+    // Mapping to store locked balances of a customer against its address
     mapping(address => LockedBalance[]) public lockedBalances;
 
+    // Event to record withdrawal details
     event Withdrawal(uint amount, uint when);
+    // Event to record lock details
     event Locked(uint amount, uint unlockTime);
+    // Event to record unlock details
     event Unlocked(uint amount, uint unlockTime);
-
-    //event Unlocked(uint amount, uint unlockTime);
 
     receive() external payable {}
 
@@ -43,6 +51,7 @@ contract Bank {
         bank = msg.sender;
     }
 
+    // Function to create a new account
     function createAccount(string memory password) public {
         CustomerDetails storage accountCreated = customers.push();
         require(msg.sender != address(0), "You cannot use a zero address");
@@ -56,6 +65,7 @@ contract Bank {
         customerCount++;
     }
 
+    // Function to deposit into the account
     function deposit() public payable {
         require(customerExist[msg.sender], "Account does not exist");
         require(msg.value > 0, "Deposit amount must be greater than 0");
