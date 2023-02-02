@@ -6,7 +6,7 @@ async function main() {
   so BankContract here is a factory for instances of our Bank contract.
   */
   const bankContract = await ethers.getContractFactory("Bank");
-  console.log("Deploying Contract, please wait");
+  console.log("Deploying Contract, please wait....");
   // here we deploy the contract
   const deployedBankContract = await bankContract.deploy();
 
