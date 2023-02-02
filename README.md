@@ -40,8 +40,22 @@ To use this smart contract, you will need the following:
 
 ## Installation
 
-To get started, clone this forked repository to your local machine
+- To get started, clone this forked repository to your local machine
 
 ```
 git clone https://github.com/Patrick-Ehimen/Decentralised-Bank.git
+```
+
+- install all dependencies with
+
+```npm install
+
+```
+
+- Open the smart contract in your development environment
+
+- run the following command to deploy the smart contract on your local blockchain network or test network
+
+```
+npx hardhat run scripts/deploy.js --network <network-name>
 ```
