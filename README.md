@@ -48,8 +48,8 @@ git clone https://github.com/Patrick-Ehimen/Decentralised-Bank.git
 
 - install all dependencies with
 
-```npm install
-
+```
+npm install
 ```
 
 - Open the smart contract in your development environment
