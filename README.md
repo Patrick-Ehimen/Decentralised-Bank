@@ -30,6 +30,18 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - Hardhat v2.12.6+
 - @nomicfoundation/hardhat-toolbox v1.0.2+
 
+## Prerequisites
+
+To use this smart contract, you will need the following:
+
+- Knowledge of Solidity programming language
+- A local blockchain network (e.g. ganache) or a test network (e.g. Goerli)
+- A development environment for smart contract development (e.g. Remix)
+
 ## Installation
 
-To install Decentralised Bank, run the following command:
+To get started, clone this forked repository to your local machine
+
+```
+git clone https://github.com/Patrick-Ehimen/Decentralised-Bank.git
+```
