@@ -61,7 +61,9 @@ contract Bank {
         require(msg.value > 0, "Deposit amount must be greater than 0");
         CustomerDetails storage accountCreated = customers.push();
         accountCreated.AcctBalance = msg.value;
-        customerDetails[msg.sender] = accountCreated;
+
+        customerDetails[msg.sender].AcctBalance += msg.value;
+        //customerDetails[msg.sender] = accountCreated;
     }
 
     function withdraw(uint amount, string memory password) public {
