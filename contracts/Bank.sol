@@ -168,11 +168,13 @@ contract Bank {
         require(customerExist[msg.sender], "Account does not exist");
         LockedBalance[] storage locked = lockedBalances[msg.sender];
         for (uint i = 0; i < locked.length; i++) {
-            if (locked[i].unlockTime <= block.timestamp) {
-                customerDetails[msg.sender].AcctBalance += locked[i].amount;
-                locked[i].amount = 0;
-                locked[i].unlockTime = 0;
-            }
+            require(
+                locked[i].unlockTime <= block.timestamp,
+                "Balance not yet unlocked"
+            );
+            customerDetails[msg.sender].AcctBalance += locked[i].amount;
+            locked[i].amount = 0;
+            locked[i].unlockTime = 0;
         }
     }
 
@@ -215,18 +217,6 @@ contract Bank {
             payable(to).transfer(transferAmount);
         }
     }
-
-    // function checkLockedBalances() public {
-    //     for (uint i = 0; i < lockedBalances[msg.sender].length; i++) {
-    //         LockedBalance storage locked = lockedBalances[msg.sender][i];
-    //         if (locked.unlockTime <= block.timestamp) {
-    //             uint amount = locked.amount;
-    //             customerDetails[msg.sender].AcctBalance += amount;
-    //             lockedBalances[msg.sender].splice(i, 1);
-    //             emit Unlock(amount);
-    //         }
-    //     }
-    // }
 
     function changePassword(
         string memory password,
